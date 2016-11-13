@@ -1,0 +1,132 @@
+﻿<Window x:Class="SPMLoader.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:speTreeViewControl="clr-namespace:SpmTreeViewControl;assembly=SpmTreeViewControl"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:bhv="clr-namespace:SPMLoader.Behaviors"
+        mc:Ignorable="d"
+        Title="Загрузчик спектров" Height="500" Width="1143"
+        DataContext="{Binding Main, Source={StaticResource Locator}}">
+    <Window.Resources>
+        <Style x:Key="CbToTbReverse" TargetType="{x:Type TextBox}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ElementName=SetAsFileNameCbx, Path=IsChecked}" Value="True">
+                    <Setter Property="TextBox.IsEnabled" Value="False"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding ElementName=SetAsFileNameCbx, Path=IsChecked}" Value="False">
+                    <Setter Property="TextBox.IsEnabled" Value="True"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+    <DockPanel>
+        <StatusBar Height="26" VerticalAlignment="Bottom" Margin="0,0,0.2,0" DockPanel.Dock="Bottom">
+            <StatusBarItem Height="26" Margin="0,0,0,-0.4" VerticalAlignment="Bottom">
+                <TextBlock Text="{Binding Status}"/>
+            </StatusBarItem>
+        </StatusBar>
+        <DockPanel>
+            <!--<Expander Header="Настройки подключения" ExpandDirection="Down" IsExpanded="False" HorizontalAlignment="Left" Width="226" Margin="-272,4,0,-4.2">-->
+            <GroupBox DockPanel.Dock="Left"  x:Name="GroupBox" Header="Настройки подключения" HorizontalAlignment="Left" Margin="10,0,0,0" Width="209">
+                <StackPanel Margin="4,4,4,4">
+                    <Label x:Name="Serverlbl" Content="Сервер:"/>
+                    <TextBox x:Name="ServerTb" Height="23" TextWrapping="Wrap" Text="{Binding ServerName}"/>
+                    <Label x:Name="Usrlbl" Content="Пользователь:"/>
+                    <TextBox x:Name="UsrTb" Height="23" TextWrapping="Wrap" Text="{Binding UserName}"/>
+                    <Label x:Name="Pwdlbl" Content="Пароль:"/>
+                    <TextBox x:Name="PwdTb" Height="23" TextWrapping="Wrap" Text="{Binding Password}"/>
+                    <Label x:Name="Schlbl" Content="БД:"/>
+                    <TextBox x:Name="SchTb" Height="23" TextWrapping="Wrap" Text="{Binding Database}"/>
+                    <!--<StackPanel Orientation="Horizontal" FlowDirection="RightToLeft" VerticalAlignment="Bottom">
+                        <StackPanel.Resources>
+                            <Style TargetType="{x:Type Button}">
+                                <Setter Property="Margin" Value="10,15,10,0"/>
+                            </Style>
+                        </StackPanel.Resources>-->
+                    <Button Height="26" Width="60" Content="OK" Command="{Binding ConnectCommand}" VerticalAlignment="Bottom" Margin="0,10"/>
+                    <!--<Button Height="26"  Width="60" Content="Применить"/>-->
+                    <!--</StackPanel>-->
+
+                </StackPanel>
+            </GroupBox>
+            <GroupBox Header="Загрузка" DockPanel.Dock="Right" Width="617" >
+                <DockPanel>
+                    <DockPanel DockPanel.Dock="Top">
+                        <Label DockPanel.Dock="Left" Content="Файл:"></Label>
+                        <Button DockPanel.Dock="Right" Content="Выбрать" Width="60" Margin="5,3,0,0" Command="{Binding SelectFileCommand}"></Button>
+                        <TextBox IsEnabled="False" Text="{Binding FileName, Mode=OneWay}" Margin="0,3,0,0"></TextBox>
+                    </DockPanel>
+                    <!--<GroupBox Header="Система/Класс">-->
+                    <Grid DockPanel.Dock="Top">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="25"></RowDefinition>
+                                <RowDefinition Height="25"></RowDefinition>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*"></ColumnDefinition>
+                                <ColumnDefinition Width="3*"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <Label Content="Система:"></Label>
+                            <TextBox IsEnabled="False"  Text="{Binding SelectedSystem.Name, Mode=OneWay}" Grid.Column="1" Grid.Row="0" Margin="0,3,0,0"></TextBox>
+                            <Label Content="Класс:" Grid.Column="0" Grid.Row="1"></Label>
+                        <TextBox IsEnabled="False" Text="{Binding SelectedClass.Name, Mode=OneWay}" Grid.Column="1" Grid.Row="1" Margin="0,3,0,0"></TextBox>
+                    </Grid>
+                    <DockPanel DockPanel.Dock="Top">
+                        <Label DockPanel.Dock="Left" Content="Название объекта:"></Label>
+                        <TextBox Style="{StaticResource CbToTbReverse}" Text="{Binding ObjectName}" Margin="0,3,0,0"></TextBox>
+                    </DockPanel>
+                    <CheckBox x:Name="SetAsFileNameCbx" Content="Установить название как имя файла" Margin="20,0,0,0" IsChecked="{Binding IsSetAsFileName}" DockPanel.Dock="Top"></CheckBox>
+                    <DockPanel DockPanel.Dock="Top">
+                        <Label DockPanel.Dock="Left" Content="Комментарий:"></Label>
+                        <TextBox TextWrapping="Wrap" AcceptsReturn="True" Text="{Binding Comment}" Margin="0,3,0,0" Height="52"></TextBox>
+                    </DockPanel>
+                    <GroupBox Header="Свойства" DockPanel.Dock="Top">
+                        <DataGrid Margin="0,3,0,0" AutoGenerateColumns="False">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Свойство" IsReadOnly="True" CanUserResize="False" MinWidth="150"/>
+                                <DataGridTextColumn Header="Значение" IsReadOnly="True" CanUserResize="False" MinWidth="150"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </GroupBox>
+                    <Button Content="Загрузить" Margin="0,0" Height="37" DockPanel.Dock="Bottom" Command="{Binding ExecuteCommand}" ></Button>
+                    <GroupBox Header="Значения">
+                        <DockPanel>
+                            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" FlowDirection="RightToLeft">
+                                <StackPanel.Resources>
+                                    <Style TargetType="{x:Type Button}">
+                                        <Setter Property="Margin" Value="10, 5, 10, 5"></Setter>
+                                        <Setter Property="Width" Value="150"></Setter>
+                                        <Setter Property="Height" Value="35"></Setter>
+                                    </Style>
+                                </StackPanel.Resources>
+                                <Button Content="Добавить" Command="{Binding AddNewTableItemCommand}"></Button>
+                                <Button Content="Очистить" Command="{Binding ClearTableItemsCommand}"></Button>
+                                <Button Content="Удалить" Command="{Binding DeleteSelectedTableItemCommand}"></Button>
+                            </StackPanel>
+                            <DataGrid CanUserResizeColumns="True" IsReadOnly="False" CanUserAddRows="True" Margin="0,3,0,0" AutoGenerateColumns="True" ItemsSource="{Binding SpectrumValues}" SelectedItem="{Binding SelectedTableItem}">
+                                <i:Interaction.Behaviors>
+                                    <bhv:ColumnHeaderBehavior/>
+                                </i:Interaction.Behaviors>
+                                <!--<DataGrid.Columns>
+                                    <DataGridTextColumn Header="L, нм" IsReadOnly="True" CanUserResize="False" MinWidth="150" Binding="{Binding LValue}"/>
+                                    <DataGridTextColumn Header="K" IsReadOnly="True" CanUserResize="False" MinWidth="150" Binding="{Binding KValue}"/>
+                                </DataGrid.Columns>-->
+                            </DataGrid>
+                        </DockPanel>
+                    </GroupBox>
+                    <!--</GroupBox>-->
+                </DockPanel>
+            </GroupBox>
+            <GroupBox Header="Спектры">
+                <!--< SystemItems="{Binding RootNodes}"/>-->
+                <speTreeViewControl:SpmTreeViewControl SystemItems="{Binding RootNodes}" SelectedItem="{Binding SelectedNode, Mode=TwoWay}"></speTreeViewControl:SpmTreeViewControl>
+            </GroupBox>
+            
+        </DockPanel>
+        <!--</Expander>-->
+
+
+    </DockPanel>
+</Window>
