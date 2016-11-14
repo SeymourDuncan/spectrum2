@@ -23,20 +23,12 @@ namespace spectrum2.ViewModel
         /// </summary>
         public MainViewModel()
         {
-            ServerName = "localhost:3306";
+            
         }
-        string _serverName;
+        //string _serverName;
         private ICommand _press;
 
-        public string ServerName {
-            get
-            {
-                return _serverName;
-            }
-            set {
-                RaisePropertyChanged(() => ServerName);
-            }
-        }
+        public string ServerName { get; set; } = "localhost:3306";
         public string UserName { get; set; } = "root";
         public string Password { get; set; } = "r2d2sat61kaz";
         public string Database { get; set; } = "spectrum2";

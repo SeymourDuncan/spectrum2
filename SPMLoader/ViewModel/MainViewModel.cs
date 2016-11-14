@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.IO.Packaging;
 using System.Linq;
 using Coredata;
 using GalaSoft.MvvmLight;
@@ -30,8 +31,8 @@ namespace SPMLoader.ViewModel
         private IList<ISpmNode> _rootNodes;
         private string _status;
         private ISpmNode _selectedNode;
-        private SpmBase _selectedClassName;
-        private SpmBase _selectedSystemName;
+        private SpmClass _selectedClass;
+        private SpmSystem _selectedSystem;
         private ICommand _selectFileCommand;
         private string _fileName;
         private string _objectName;
@@ -61,6 +62,7 @@ namespace SPMLoader.ViewModel
         public string Password { get; set; } = "r2d2sat61kaz";
         public string Database { get; set; } = "spectrum2";
 
+        public string Comment { get; set; } = "";
         public string Status
         {
             get { return _status; }
@@ -138,20 +140,20 @@ namespace SPMLoader.ViewModel
             }
         }
 
-        public SpmBase SelectedSystem
+        public SpmSystem SelectedSystem
         {
-            get { return _selectedSystemName; }
+            get { return _selectedSystem; }
             set
             {
-                this.Set(ref _selectedSystemName, value, broadcast: true);
+                this.Set(ref _selectedSystem, value, broadcast: true);
             }
         }
-        public SpmBase SelectedClass
+        public SpmClass SelectedClass
         {
-            get { return _selectedClassName; }
+            get { return _selectedClass; }
             set
             {
-                this.Set(ref _selectedClassName, value, broadcast: true);
+                this.Set(ref _selectedClass, value, broadcast: true);
             }
         }
 
@@ -166,14 +168,14 @@ namespace SPMLoader.ViewModel
             {
                 case SpmNodeType.SntSystem:
                 {
-                    SelectedSystem = (SpmBase)SelectedNode;
+                    SelectedSystem = (SpmSystem)SelectedNode;
                     break;
                 }
                 case SpmNodeType.SntClass:
                 {
                     var cl = (SpmClass) SelectedNode;
                     SelectedClass = cl;
-                    SelectedSystem = (SpmBase) cl?.ParentSystem;
+                    SelectedSystem = cl?.ParentSystem;
                     break;
                 }
                 case SpmNodeType.SntObject:
@@ -197,7 +199,8 @@ namespace SPMLoader.ViewModel
                 }
                 catch (Exception e)
                 {
-                    Status = string.Format("Обновление дерева спектров не удалось. Причина:%1", e.Message);
+                    Status = $"Обновление дерева спектров не удалось. Причина: {e.Message}";
+                    return;
                 }
                 Status = "Дерево спектров обновлено.";
             }
@@ -288,7 +291,18 @@ namespace SPMLoader.ViewModel
 
         void DoExecute()
         {
+            var spmObj = new SpmObject(0, ObjectName, SelectedSystem, Comment);
+            spmObj.Class = SelectedClass;
+            spmObj.Values = SpectrumValues.ToDictionary(item => item.LValue, item => item.KValue);
             
+            if (DataModel.SaveToDb(spmObj))
+            {
+                // освежаем дерево
+                RootNodes = DataModel.Model.Cast<ISpmNode>().ToList();
+                DialogService.ShowMessage($"Объект {spmObj.Name} успешно загружен в БД");
+            }
+            else
+                DialogService.ShowMessage("Ошибка загрузки объекта в БД.См.лог для подробностей.");            
         }
     }
 }

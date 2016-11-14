@@ -10,7 +10,7 @@ namespace SPMLoader.ViewModel
 {
     public interface IDialogService
     {
-        void ShowMessage(string message, string title);
+        void ShowMessage(string message, string title = "Сообщение");
         void ShowError(string errorMessage);        
         string GetOpenFileDialogResult();
     }
@@ -36,7 +36,7 @@ namespace SPMLoader.ViewModel
             var dialog = MessageBox.Show(errorMessage, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
-        public void ShowMessage(string message, string title)
+        public void ShowMessage(string message, string title = "Сообщение")
         {
             var dialog = MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Information);
         }

@@ -8,8 +8,8 @@ namespace Coredata
         // объекту пофигу какого он класса. Думаю не понадобится
         public SpmObject(int id, string name, SpmSystem system, string comment) : base(id, name)
         {
-            System = system;            
-            Comment = Comment;
+            System = system;                        
+            Comment = comment;
         }
         public SpmSystem System { get; set; }
         public SpmClass Class { get; set; }

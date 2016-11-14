@@ -23,10 +23,11 @@ namespace Coredata
         string GetName();
     }
 
+
     public interface ISpmLoader
     {
         // TODO свойства
-        bool SaveOneObject(int sysId, int classId, string name, Dictionary<double, double> values, string comment = "");
+        //bool SaveOneObject(int sysId, int classId, string name, Dictionary<double, double> values, string comment = "");
+        bool SaveToDb(SpmObject spmObj);
     }
-
 }

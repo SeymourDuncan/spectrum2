@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 using System.Data;
+using System.Globalization;
 
 namespace Coredata
 {
@@ -18,6 +19,8 @@ namespace Coredata
         private IList<SpmSystem> _model = new List<SpmSystem>();
         private bool _isModelLoaded = false;
 
+
+        //public int LastObjId = 0;
         // собственно модель - это список систем
         public IList<SpmSystem> Model
         {
@@ -162,13 +165,16 @@ namespace Coredata
                     }
                 }
             }
-
-
         }
 
-        public bool SaveOneObject(int sysId, int classId, string name, Dictionary<double, double> values,
-            string comment = "")
+        public bool SaveToDb(SpmObject spmObj)
         {
+            var classId = spmObj.Class.Id;
+            var sysId = spmObj.System.Id;
+            var name = spmObj.Name;
+            var values = spmObj.Values;
+            var comment = spmObj.Comment;
+
             if (sysId == 0 || classId == 0 || values.Count == 0 || string.IsNullOrEmpty(name))
                 return false;
 
@@ -188,16 +194,25 @@ namespace Coredata
                 }
 
                 // добавляем значения
-                var cStr = new StringBuilder(SqlHelper.InsertObjectQuery);
-                var tmpLst = values.Select(val => $"('{id}','{val.Key}', '{val.Value}')").ToList();                
+                var cStr = new StringBuilder(SqlHelper.InsertSpmValuesQuery);
+
+                NumberFormatInfo nfi = new NumberFormatInfo();
+                nfi.NumberDecimalSeparator = ".";
+                var tmpLst = values.Select(val => $"({id}, {val.Key.ToString(nfi)}, {val.Value.ToString(nfi)})").ToList();                
                 cStr.Append(string.Join(", ", tmpLst));
                 cStr.Append(";");
+                
 
                 using (var cmd = new MySqlCommand(cStr.ToString(), conn))
                 {
                     cmd.CommandType = CommandType.Text;
                     cmd.ExecuteNonQuery();
                 }
+
+                // добавляем объект в модель
+                spmObj.Id = id;
+                spmObj.System.Objects.Add(spmObj);
+                spmObj.Class.ChildList.Add(spmObj);
                 return true;
             }
 
