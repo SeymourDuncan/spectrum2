@@ -11,12 +11,6 @@ namespace SPMLoader.Model
 {
     public class SpmDataGridItem: ObservableObject
     {
-        //[DisplayName(@"L, нм.")]
-        //public string LValue { get; set; }
-
-        //[DisplayName(@"K")]
-        //public string KValue { get; set; }
-
         [DisplayName(@"L, нм.")]
         public double LValue { get; set; }
 

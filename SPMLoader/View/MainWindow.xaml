@@ -83,11 +83,47 @@
                         <TextBox TextWrapping="Wrap" AcceptsReturn="True" Text="{Binding Comment}" Margin="0,3,0,0" Height="52"></TextBox>
                     </DockPanel>
                     <GroupBox Header="Свойства" DockPanel.Dock="Top">
-                        <DataGrid Margin="0,3,0,0" AutoGenerateColumns="False">
+                        <DataGrid Margin="0,3,0,0" CanUserAddRows="False"  AutoGenerateColumns="False" ItemsSource="{Binding PropertyValues}">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Свойство" IsReadOnly="True" CanUserResize="False" MinWidth="150"/>
-                                <DataGridTextColumn Header="Значение" IsReadOnly="True" CanUserResize="False" MinWidth="150"/>
+                                <DataGridTextColumn Header="Название" Binding="{Binding PropertyName}"/>
+                                <DataGridTemplateColumn Header="Значение">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <ContentControl>
+                                                <ContentControl.Style>
+                                                    <Style TargetType="ContentControl">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsDict}" Value="False">
+                                                                <Setter Property="ContentTemplate">
+                                                                    <Setter.Value>
+                                                                        <DataTemplate>
+                                                                            <TextBox Text="{Binding Path=DataContext.PropertyValue, RelativeSource={RelativeSource AncestorType={x:Type DataGridColumn}}}"/>
+                                                                        </DataTemplate>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding IsDict}" Value="True">
+                                                                <Setter Property="ContentTemplate">
+                                                                    <Setter.Value>
+                                                                        <DataTemplate>
+                                                                            <ComboBox ItemsSource="{Binding Path=DataContext.Dictionary.Values, RelativeSource={RelativeSource AncestorType={x:Type DataGridCell}}}"
+                                                                                      SelectedItem="{Binding Path=DataContext.SelectedItem, RelativeSource={RelativeSource AncestorType={x:Type DataGridCell}}}"
+                                                                                      />
+                                                                        </DataTemplate>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </ContentControl.Style>
+                                            </ContentControl>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
                             </DataGrid.Columns>
+                            <!--<i:Interaction.Behaviors>
+                                <bhv:ColumnHeaderBehavior/>
+                            </i:Interaction.Behaviors>-->
                         </DataGrid>
                     </GroupBox>
                     <Button Content="Загрузить" Margin="0,0" Height="37" DockPanel.Dock="Bottom" Command="{Binding ExecuteCommand}" ></Button>
@@ -109,10 +145,6 @@
                                 <i:Interaction.Behaviors>
                                     <bhv:ColumnHeaderBehavior/>
                                 </i:Interaction.Behaviors>
-                                <!--<DataGrid.Columns>
-                                    <DataGridTextColumn Header="L, нм" IsReadOnly="True" CanUserResize="False" MinWidth="150" Binding="{Binding LValue}"/>
-                                    <DataGridTextColumn Header="K" IsReadOnly="True" CanUserResize="False" MinWidth="150" Binding="{Binding KValue}"/>
-                                </DataGrid.Columns>-->
                             </DataGrid>
                         </DockPanel>
                     </GroupBox>

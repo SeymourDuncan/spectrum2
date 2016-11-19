@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using GalaSoft.MvvmLight;
 
 namespace Coredata
 {
@@ -24,7 +23,7 @@ namespace Coredata
     }
 
 
-    public class SpmBase: ObservableObject
+    public class SpmBase
     {
         public int Id { get; set; }
         public string Name { get; set; }

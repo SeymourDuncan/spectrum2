@@ -38,6 +38,7 @@ namespace SPMLoader.ViewModel
         private string _objectName;
         private bool _isSetAsFileName;
         private ObservableCollection<SpmDataGridItem> _spectrumValues;
+        private ObservableCollection<DummyPropValue> _propertyValues;        
         private ICommand _deleteSelectedTableItem;
         private ICommand _addNewTableItemCommand;
         private ICommand _clearTableItemsCommand;
@@ -46,6 +47,7 @@ namespace SPMLoader.ViewModel
         {            
             DataModel = new SpmStorage();            
             _spectrumValues = new ObservableCollection<SpmDataGridItem>();
+            _propertyValues = new ObservableCollection<DummyPropValue>();
             ExecuteCommand = new AutoRelayCommand(DoExecute, CanDoExecute);
 
             ExecuteCommand.DependsOn(() => SpectrumValues);
@@ -139,6 +141,15 @@ namespace SPMLoader.ViewModel
                 this.Set(ref _spectrumValues, value, broadcast: true);
             }
         }
+        public ObservableCollection<DummyPropValue> PropertyValues
+        {
+            get { return _propertyValues; }
+            set
+            {
+                _propertyValues = value;
+                RaisePropertyChanged(() => PropertyValues);
+            }
+        }
 
         public SpmSystem SelectedSystem
         {
@@ -146,6 +157,8 @@ namespace SPMLoader.ViewModel
             set
             {
                 this.Set(ref _selectedSystem, value, broadcast: true);
+                if (_selectedSystem != null)
+                    UpdatePropertyValues();
             }
         }
         public SpmClass SelectedClass
@@ -155,6 +168,19 @@ namespace SPMLoader.ViewModel
             {
                 this.Set(ref _selectedClass, value, broadcast: true);
             }
+        }
+
+        /// <summary>
+        /// Обновляем значения в таблице Свойства
+        /// </summary>
+        void UpdatePropertyValues()
+        {
+            PropertyValues.Clear();
+            foreach (var prop in SelectedSystem.Properties.Properties)
+            {
+                var dummyProp = prop.Type == SpmTypeEnum.stDictType ? new DummyDictPropValue(prop) : new DummyPropValue(prop);
+                PropertyValues.Add(dummyProp);
+            }            
         }
 
         /// <summary>

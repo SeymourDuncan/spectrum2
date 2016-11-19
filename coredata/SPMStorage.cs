@@ -36,6 +36,10 @@ namespace Coredata
 
         public MySqlConnectionStringBuilder ConnectionString { get; private set; }
 
+        public SpmDictionaries Dictionaries { get; set; }
+
+        public SpmPropValueTypes PropValueTypes { get; set; }
+
         /// <summary>
         /// проверяем подключение
         /// </summary>
@@ -76,9 +80,15 @@ namespace Coredata
             using (var conn = new MySqlConnection(ConnectionString.ConnectionString))
             {
                 conn.Open();
+                // Служебная часть
+                LoadPropValueTypes(conn);
+                LoadDictionaries(conn);
+                // Данные
                 LoadSystems(conn);
                 LoadClasses(conn);
                 LoadObjects(conn);
+
+                LoadProperties(conn);
             }
             return true;
         }
@@ -167,6 +177,73 @@ namespace Coredata
             }
         }
 
+        public void LoadProperties(MySqlConnection conn)
+        {
+            foreach (var sys in _model)
+            {
+                using (var cmd = new MySqlCommand(SqlHelper.SelectPropertyBySystemQuery, conn))
+                {
+                    cmd.Parameters.AddWithValue("@system_id", sys.Id);
+                    var reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        var spmProp = new SpmProperty(reader.GetInt32("ID"), reader.GetString("NAME"));
+
+                        sys.Properties.Add(spmProp);
+                        spmProp.Type = PropValueTypes.GetTypeById(reader.GetInt32("VALUE_TYPE_ID"));
+
+                        var dict = Dictionaries.GetDictoinary(reader.GetInt32("DICTIONARY"));
+                        if (spmProp.Type == SpmTypeEnum.stDictType && dict != null)
+                        {
+                            spmProp.Dictionary = dict;
+                        }
+                    }
+                    reader.Close();
+                }
+
+                using (var cmd2 = new MySqlCommand(SqlHelper.SelectPropertyValueQuery, conn))
+                {
+                    cmd2.Parameters.AddWithValue("@property_id", MySqlDbType.Int32);
+                    foreach (var prop in sys.Properties.Properties)
+                    {
+                        cmd2.Parameters["@property_id"].Value = prop.Id;
+                        var reader2 = cmd2.ExecuteReader();
+                        while (reader2.Read())
+                        {
+                            var objId = reader2.GetInt32("OBJ_ID");
+                            var obj = sys.Objects.FirstOrDefault(o => o.Id == objId);
+                            if (obj == null)
+                                continue;
+                            var propVal = new SpmPropertyValue
+                            {
+                                Property = prop,
+                                Value = reader2.GetString("VALUE"),
+                                Object = obj
+                            };
+                            sys.AddPropertyValue(propVal);
+                        }
+                        reader2.Close();
+                    }                                      
+                }
+            }
+
+        }
+
+        public void LoadPropertyValues(MySqlConnection conn, int propId)
+        {
+            using (var cmd = new MySqlCommand(SqlHelper.SelectPropertyValueQuery, conn))
+            {
+                cmd.Parameters.AddWithValue("@property_id", propId);
+                var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    
+                    string value = reader.GetString("VALUE");
+                }
+                reader.Close();
+            }
+        }
+
         public bool SaveToDb(SpmObject spmObj)
         {
             var classId = spmObj.Class.Id;
@@ -198,10 +275,11 @@ namespace Coredata
 
                 NumberFormatInfo nfi = new NumberFormatInfo();
                 nfi.NumberDecimalSeparator = ".";
-                var tmpLst = values.Select(val => $"({id}, {val.Key.ToString(nfi)}, {val.Value.ToString(nfi)})").ToList();                
+                var tmpLst =
+                    values.Select(val => $"({id}, {val.Key.ToString(nfi)}, {val.Value.ToString(nfi)})").ToList();
                 cStr.Append(string.Join(", ", tmpLst));
                 cStr.Append(";");
-                
+
 
                 using (var cmd = new MySqlCommand(cStr.ToString(), conn))
                 {
@@ -216,6 +294,63 @@ namespace Coredata
                 return true;
             }
 
+        }
+
+        public void LoadDictionaries(MySqlConnection conn)
+        {
+            Dictionaries = new SpmDictionaries();
+            using (var cmd = new MySqlCommand(SqlHelper.SelectDictionariesQuery, conn))
+            {
+                var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    var spmDict = new SpmDictionary(reader.GetInt32("ID"), reader.GetString("NAME"),
+                        reader.GetString("COMMENT"));                    
+                    Dictionaries.AddDictionary(spmDict);
+                }
+                reader.Close();
+
+                foreach (var dict in Dictionaries.Values)
+                {
+                    LoadDictionary(conn, dict);
+                }              
+            }
+        }
+
+        public void LoadDictionary(MySqlConnection conn, SpmDictionary spmDict)
+        {
+            using (var cmd = new MySqlCommand(SqlHelper.SelectDictionaryValueQuery, conn))
+            {
+                cmd.Parameters.AddWithValue("@dict_id", spmDict.Id);
+                var reader = cmd.ExecuteReader();
+                int idx = 0;
+                while (reader.Read())
+                {
+                    var dictVal = new DictValue();
+                    dictVal.Id = idx;
+                    dictVal.Value = reader.GetString("NAME");
+                    var ord = reader.GetOrdinal("COMMENT");
+                    dictVal.Comment = reader.IsDBNull(ord) ? "" : reader.GetString(ord);
+
+                    spmDict.AddValue(dictVal);
+                    idx++;
+                }
+                reader.Close();
+            }
+        }
+
+        public void LoadPropValueTypes(MySqlConnection conn)
+        {
+            PropValueTypes = new SpmPropValueTypes();
+            using (var cmd = new MySqlCommand(SqlHelper.SelectPropValueTypesQuery, conn))
+            {
+                var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    PropValueTypes.AddValue(reader.GetInt32("ID"), reader.GetString("NAME"));                    
+                }
+                reader.Close();
+            }
         }
     }
 }
