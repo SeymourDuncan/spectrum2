@@ -85,8 +85,8 @@
                     <GroupBox Header="Свойства" DockPanel.Dock="Top">
                         <DataGrid Margin="0,3,0,0" CanUserAddRows="False"  AutoGenerateColumns="False" ItemsSource="{Binding PropertyValues}">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Название" Binding="{Binding PropertyName}"/>
-                                <DataGridTemplateColumn Header="Значение">
+                                <DataGridTextColumn Header="Название" Binding="{Binding PropertyName}" Width="150"/>
+                                <DataGridTemplateColumn Header="Значение" Width="150">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <ContentControl>
@@ -119,14 +119,14 @@
                                             </ContentControl>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
+                                </DataGridTemplateColumn >
                             </DataGrid.Columns>
                             <!--<i:Interaction.Behaviors>
                                 <bhv:ColumnHeaderBehavior/>
                             </i:Interaction.Behaviors>-->
                         </DataGrid>
                     </GroupBox>
-                    <Button Content="Загрузить" Margin="0,0" Height="37" DockPanel.Dock="Bottom" Command="{Binding ExecuteCommand}" ></Button>
+                    <Button Content="Загрузить" Margin="0,0" Height="37" DockPanel.Dock="Bottom" Command="{Binding ExecuteCommand}" />
                     <GroupBox Header="Значения">
                         <DockPanel>
                             <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" FlowDirection="RightToLeft">

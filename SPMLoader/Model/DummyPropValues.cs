@@ -30,12 +30,11 @@ namespace SPMLoader.Model
             return PropertyValue;
         }
 
-        [DisplayName(@"Свойство")]
         public string PropertyName { get; set; }
         /// <summary>
         /// Значение, которое показывается
         /// </summary>
-        [DisplayName(@"Значение")]        
+        
         public string PropertyValue { get; set; }
 
         public bool IsDict

@@ -181,6 +181,7 @@ namespace Coredata
         {
             foreach (var sys in _model)
             {
+                // Загружаем свойства
                 using (var cmd = new MySqlCommand(SqlHelper.SelectPropertyBySystemQuery, conn))
                 {
                     cmd.Parameters.AddWithValue("@system_id", sys.Id);
@@ -201,6 +202,7 @@ namespace Coredata
                     reader.Close();
                 }
 
+                // Загружаем значения свойств
                 using (var cmd2 = new MySqlCommand(SqlHelper.SelectPropertyValueQuery, conn))
                 {
                     cmd2.Parameters.AddWithValue("@property_id", MySqlDbType.Int32);
@@ -229,22 +231,7 @@ namespace Coredata
 
         }
 
-        public void LoadPropertyValues(MySqlConnection conn, int propId)
-        {
-            using (var cmd = new MySqlCommand(SqlHelper.SelectPropertyValueQuery, conn))
-            {
-                cmd.Parameters.AddWithValue("@property_id", propId);
-                var reader = cmd.ExecuteReader();
-                while (reader.Read())
-                {
-                    
-                    string value = reader.GetString("VALUE");
-                }
-                reader.Close();
-            }
-        }
-
-        public bool SaveToDb(SpmObject spmObj)
+        public bool SaveObjToDb(SpmObject spmObj)
         {
             var classId = spmObj.Class.Id;
             var sysId = spmObj.System.Id;
@@ -296,6 +283,37 @@ namespace Coredata
 
         }
 
+        public bool SavePropValsToDb(List<SpmPropertyValue> propVals)
+        {
+            if (!propVals.Any())
+                return false;
+            using (var conn = new MySqlConnection(ConnectionString.ConnectionString))
+            {
+                conn.Open();
+                // добавляем значения
+                var cStr = new StringBuilder(SqlHelper.InsertPropValuesQuery);    
+          
+                var tmpLst =
+                    propVals.Select(val => $"({val.Object.Id}, {val.Property.Id}, {val.Value})").ToList();
+                cStr.Append(string.Join(", ", tmpLst));
+                cStr.Append(";");
+
+                using (var cmd = new MySqlCommand(cStr.ToString(), conn))
+                {
+                    cmd.CommandType = CommandType.Text;
+                    cmd.ExecuteNonQuery();
+                }
+
+                // добавляем свойства
+                propVals.ForEach(val =>
+                {
+                    var sys = propVals[0].Object.System;
+                    sys.AddPropertyValue(val);
+                });
+                
+                return true;
+            }
+        }
         public void LoadDictionaries(MySqlConnection conn)
         {
             Dictionaries = new SpmDictionaries();

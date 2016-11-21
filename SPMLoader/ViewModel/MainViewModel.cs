@@ -320,15 +320,37 @@ namespace SPMLoader.ViewModel
             var spmObj = new SpmObject(0, ObjectName, SelectedSystem, Comment);
             spmObj.Class = SelectedClass;
             spmObj.Values = SpectrumValues.ToDictionary(item => item.LValue, item => item.KValue);
-            
-            if (DataModel.SaveToDb(spmObj))
+
+            // сохраняем объект
+            if (DataModel.SaveObjToDb(spmObj))
             {
                 // освежаем дерево
                 RootNodes = DataModel.Model.Cast<ISpmNode>().ToList();
                 DialogService.ShowMessage($"Объект {spmObj.Name} успешно загружен в БД");
             }
             else
-                DialogService.ShowMessage("Ошибка загрузки объекта в БД.См.лог для подробностей.");            
+            {
+                DialogService.ShowMessage($"Ошибка загрузки объекта {spmObj.Name} в БД. См.лог для подробностей.");
+                return;
+            }
+           
+            // сохраняет свойства     
+            var propValues = PropertyValues.Select(propv => new SpmPropertyValue()
+            {
+                Object = spmObj, Property = propv.GetProperty(), Value = propv.GetPropertyValue()
+            }).ToList();
+
+            if (DataModel.SavePropValsToDb(propValues))
+            {
+                // освежаем дерево
+                RootNodes = DataModel.Model.Cast<ISpmNode>().ToList();
+                DialogService.ShowMessage($"Объект {spmObj.Name} успешно загружен в БД");
+            }
+            else
+            {
+                DialogService.ShowMessage($"Ошибка загрузки свойств объекта {spmObj.Name} в БД. См.лог для подробностей.");                
+            }
+
         }
     }
 }

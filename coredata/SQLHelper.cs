@@ -26,5 +26,6 @@ namespace Coredata
 
         public static string InsertObjectQuery = "Insert into OBJECT(NAME, CLASS_ID, SYSTEM_ID, COMMENT) values(@name, @class_id, @system_id, @comment)";
         public static string InsertSpmValuesQuery = "Insert into SPECTRUM_VALUE(OBJ_ID, L_VAL, K_VAL) values";
+        public static string InsertPropValuesQuery = "Insert into PROPERTY_VALUE(OBJ_ID, PROPERTY_ID, VALUE) values";
     }
 }   
