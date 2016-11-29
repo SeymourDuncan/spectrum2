@@ -61,7 +61,7 @@ namespace Coredata
 
         public DictValue GetValue(int id)
         {
-            return Values.First(dv => dv.Id == id);
+            return Values.FirstOrDefault(dv => dv.Id == id);
         }
     }
 

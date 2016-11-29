@@ -9,11 +9,14 @@ namespace coredata
 {
     public static class SpmExtenstions
     {
-        public static dynamic GetPropValue(this SpmObject obj, SpmProperty prop)
+        public static string GetPropValue(this SpmObject obj, SpmProperty prop)
         {
             var system = obj.System;
-            return null;
-
+            if (system == null)
+                return "";
+            var propVal =
+                system.PropValues.FirstOrDefault(item => item.Object.Id == obj.Id && item.Property.Id == prop.Id);
+            return propVal != null ? propVal.Value : "";
         }
     }
 }

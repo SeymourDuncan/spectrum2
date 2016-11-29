@@ -67,6 +67,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Behaviors\ColumnHeaderBehavior.cs" />
+    <Compile Include="Behaviors\PasswordBehavior.cs" />
     <Compile Include="Model\DummyPropValues.cs" />
     <Compile Include="Model\FileParser.cs" />
     <Compile Include="Model\SpmDataGridItem.cs" />

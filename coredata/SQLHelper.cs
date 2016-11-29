@@ -27,5 +27,9 @@ namespace Coredata
         public static string InsertObjectQuery = "Insert into OBJECT(NAME, CLASS_ID, SYSTEM_ID, COMMENT) values(@name, @class_id, @system_id, @comment)";
         public static string InsertSpmValuesQuery = "Insert into SPECTRUM_VALUE(OBJ_ID, L_VAL, K_VAL) values";
         public static string InsertPropValuesQuery = "Insert into PROPERTY_VALUE(OBJ_ID, PROPERTY_ID, VALUE) values";
+
+        public static string UpdateObjectQuery = "Update OBJECT set NAME=@name, COMMENT=@comment where ID=@objId";
+        public static string UpdatePropValuesQuery = "Update PROPERTY_VALUE set VALUE=@value where OBJ_ID=@objId and PROPERTY_ID=@propId";
+        public static string DeleteSpmValuesQuery = "Delete from SPECTRUM_VALUE where OBJ_ID=@objId";
     }
 }   

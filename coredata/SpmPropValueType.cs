@@ -48,7 +48,7 @@ namespace Coredata
             {
                 stype = SpmTypeEnum.stInteger;
             }            
-            else if (string.Equals(name, "double"))
+            else if (string.Equals(name, "float"))
             {
                 stype = SpmTypeEnum.stDouble;
             }

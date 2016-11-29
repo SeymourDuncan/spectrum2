@@ -3,15 +3,32 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Schema;
 
 namespace Coredata
 {   
     public class SpmPropertyValue
     {
         public SpmProperty Property;
-        public string Value;
-        public SpmObject Object;
 
+        public string Value
+        {
+            get { return _value; }
+            set
+            {
+                if (Property.Validate(value))
+                {
+                    _value = value;
+                }
+                else
+                {
+                    _value = Property.GetDefaultValue();
+                }
+            }
+        }        
+        public SpmObject Object;
+        private string _value = "";
+         
         public dynamic GetValue()
         {
             dynamic res = Value;
@@ -65,5 +82,47 @@ namespace Coredata
         }        
         public SpmTypeEnum Type { get; set; }
         public SpmDictionary Dictionary { get; set; }
+
+        public string GetDefaultValue()
+        {
+            switch (Type)
+            {                
+                case SpmTypeEnum.stDouble:
+                    return "0,0";
+                case SpmTypeEnum.stInteger:
+                    return "0";
+                case SpmTypeEnum.stDictType:
+                    return "0";                        
+                default:
+                    return "";
+            }
+        }
+        public bool Validate(string val)
+        {
+            try
+            {
+                switch (Type)
+                {
+                    case SpmTypeEnum.stDate:
+                        Convert.ToDateTime(val);
+                        break;
+                    case SpmTypeEnum.stDouble:
+                        Convert.ToDouble(val);
+                        break;
+                    case SpmTypeEnum.stInteger:
+                        Convert.ToInt32(val);
+                        break;
+                    case SpmTypeEnum.stDictType:
+                        return Dictionary.GetValue(Convert.ToInt32(val)).Id != 0; // я - говнокодер! ура                        
+                    default:
+                        return true;                        
+                }
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
+        }
     }
 }

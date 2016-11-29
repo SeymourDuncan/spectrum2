@@ -7,7 +7,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <DockPanel x:Name="LayoutRoot">
-        <TextBlock DockPanel.Dock="Top" Text="Search"/>
+        <TextBlock DockPanel.Dock="Top" Text="Поиск..."/>
         <TreeView ItemsSource="{Binding TopLevelItems}">
         <TreeView.ItemContainerStyle>
             <Style TargetType="{x:Type TreeViewItem}">

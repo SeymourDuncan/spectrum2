@@ -8,6 +8,7 @@ using System.Linq;
 using Coredata;
 using GalaSoft.MvvmLight;
 using System.Windows.Input;
+using coredata;
 using GalaSoft.MvvmLight.Command;
 using SPMLoader.Model;
 
@@ -42,6 +43,9 @@ namespace SPMLoader.ViewModel
         private ICommand _deleteSelectedTableItem;
         private ICommand _addNewTableItemCommand;
         private ICommand _clearTableItemsCommand;
+        private ICommand _loadedCommand;
+        private string _password;
+        private SpmObject _selectedObject;
 
         public MainViewModel()
         {            
@@ -49,11 +53,18 @@ namespace SPMLoader.ViewModel
             _spectrumValues = new ObservableCollection<SpmDataGridItem>();
             _propertyValues = new ObservableCollection<DummyPropValue>();
             ExecuteCommand = new AutoRelayCommand(DoExecute, CanDoExecute);
+            EditCommand = new AutoRelayCommand(DoUpdate, CanDoUpdate);
 
             ExecuteCommand.DependsOn(() => SpectrumValues);
             ExecuteCommand.DependsOn(() => ObjectName);
             ExecuteCommand.DependsOn(() => SelectedClass);
             ExecuteCommand.DependsOn(() => SelectedSystem);
+
+            EditCommand.DependsOn(() => SpectrumValues);
+            EditCommand.DependsOn(() => ObjectName);
+            EditCommand.DependsOn(() => SelectedClass);
+            EditCommand.DependsOn(() => SelectedSystem);
+            EditCommand.DependsOn(() => SelectedObject);
         }
 
         SpmStorage DataModel { get; set; }        
@@ -61,7 +72,17 @@ namespace SPMLoader.ViewModel
 
         public string ServerName { get; set; } = "localhost";
         public string UserName { get; set; } = "root";
-        public string Password { get; set; } = "r2d2sat61kaz";
+
+        public string Password
+        {
+            get { return _password; }
+            set
+            {
+                _password = value;
+                RaisePropertyChanged(() => Password);
+            }
+        }
+
         public string Database { get; set; } = "spectrum2";
 
         public string Comment { get; set; } = "";
@@ -75,6 +96,7 @@ namespace SPMLoader.ViewModel
             }
     }
 
+        public string SaveButtonCaption { get; set; } = "Сохранить изменения";
         public IList<ISpmNode> RootNodes
         {
             get { return _rootNodes; }
@@ -91,7 +113,7 @@ namespace SPMLoader.ViewModel
             set
             {
                 _selectedNode = value;
-                DeterminParentNames();
+                UpdateSelectedNodes();
             }
         }
 
@@ -141,6 +163,7 @@ namespace SPMLoader.ViewModel
                 this.Set(ref _spectrumValues, value, broadcast: true);
             }
         }
+
         public ObservableCollection<DummyPropValue> PropertyValues
         {
             get { return _propertyValues; }
@@ -169,6 +192,12 @@ namespace SPMLoader.ViewModel
                 this.Set(ref _selectedClass, value, broadcast: true);
             }
         }
+                
+        public SpmObject SelectedObject
+        {
+            get { return _selectedObject; }
+            set { this.Set(ref _selectedObject, value, broadcast: true); }
+        }
 
         /// <summary>
         /// Обновляем значения в таблице Свойства
@@ -178,23 +207,27 @@ namespace SPMLoader.ViewModel
             PropertyValues.Clear();
             foreach (var prop in SelectedSystem.Properties.Properties)
             {
-                var dummyProp = prop.Type == SpmTypeEnum.stDictType ? new DummyDictPropValue(prop) : new DummyPropValue(prop);
+                string val = "";
+                if (SelectedObject != null)
+                    val = SelectedObject.GetPropValue(prop);
+                var dummyProp = prop.Type == SpmTypeEnum.stDictType ? new DummyDictPropValue(prop, val) : new DummyPropValue(prop, val);
                 PropertyValues.Add(dummyProp);
-            }            
+            }           
         }
 
         /// <summary>
         /// Находим Систему и Класс выбранного элемента
         /// </summary>
-        void DeterminParentNames()
+        void UpdateSelectedNodes()
         {
             SelectedClass = null;
             SelectedSystem = null;
+            SelectedObject = null;
             switch (SelectedNode.GetNodeType())
             {
                 case SpmNodeType.SntSystem:
                 {
-                    SelectedSystem = (SpmSystem)SelectedNode;
+                    SelectedSystem = (SpmSystem)SelectedNode;                    
                     break;
                 }
                 case SpmNodeType.SntClass:
@@ -206,9 +239,20 @@ namespace SPMLoader.ViewModel
                 }
                 case SpmNodeType.SntObject:
                 {
-                    var obj = (SpmObject) SelectedNode;                    
-                    SelectedSystem = obj.System;
-                    SelectedClass = obj.Class;
+                    SelectedObject = (SpmObject) SelectedNode;
+                    if (SelectedObject != null)
+                    {
+                        ObjectName = SelectedObject.Name;
+                        Comment = SelectedObject.Comment;
+                        SpectrumValues.Clear();
+                        foreach (var val in SelectedObject.Values)
+                        {
+                            SpectrumValues.Add(new SpmDataGridItem() {KValue = val.Kval, LValue = val.Lval});
+                        }
+
+                        SelectedSystem = SelectedObject.System;
+                        SelectedClass = SelectedObject.Class;
+                    }
                     break;
                 }
             }
@@ -298,8 +342,21 @@ namespace SPMLoader.ViewModel
             }
         }
 
-
+        public ICommand LoadedCommand
+        {
+            get
+            {
+                return _loadedCommand ?? (_loadedCommand = new RelayCommand<object>((obj) =>
+                {
+                    Password = "r2d2sat61kaz";
+                }));
+            }
+        }
+        // создание нового объекта
         public AutoRelayCommand ExecuteCommand { get; set; }
+
+        // редактировать объект
+        public AutoRelayCommand EditCommand { get; set; }
 
         bool CanDoExecute()
         {
@@ -317,40 +374,96 @@ namespace SPMLoader.ViewModel
 
         void DoExecute()
         {
-            var spmObj = new SpmObject(0, ObjectName, SelectedSystem, Comment);
-            spmObj.Class = SelectedClass;
-            spmObj.Values = SpectrumValues.ToDictionary(item => item.LValue, item => item.KValue);
+            try
+            {
+                var spmObj = new SpmObject(0, ObjectName, SelectedSystem, Comment);
+                spmObj.Class = SelectedClass;
+                spmObj.Values = SpectrumValues.Select(item => new SpmLKValue() {Kval = item.KValue, Lval = item.LValue }).ToList();
 
-            // сохраняем объект
-            if (DataModel.SaveObjToDb(spmObj))
-            {
-                // освежаем дерево
-                RootNodes = DataModel.Model.Cast<ISpmNode>().ToList();
-                DialogService.ShowMessage($"Объект {spmObj.Name} успешно загружен в БД");
-            }
-            else
-            {
-                DialogService.ShowMessage($"Ошибка загрузки объекта {spmObj.Name} в БД. См.лог для подробностей.");
-                return;
-            }
-           
-            // сохраняет свойства     
-            var propValues = PropertyValues.Select(propv => new SpmPropertyValue()
-            {
-                Object = spmObj, Property = propv.GetProperty(), Value = propv.GetPropertyValue()
-            }).ToList();
+                // сохраняем объект
+                if (DataModel.SaveObjToDb(spmObj))
+                {
+                    // освежаем дерево
+                    RootNodes = DataModel.Model.Cast<ISpmNode>().ToList();
+                    // сохраняет свойства     
+                    var propValues = PropertyValues.Select(propv => new SpmPropertyValue()
+                    {
+                        Object = spmObj,
+                        Property = propv.GetProperty(),
+                        Value = propv.GetPropertyValue()
+                    }).ToList();
 
-            if (DataModel.SavePropValsToDb(propValues))
-            {
-                // освежаем дерево
-                RootNodes = DataModel.Model.Cast<ISpmNode>().ToList();
-                DialogService.ShowMessage($"Объект {spmObj.Name} успешно загружен в БД");
-            }
-            else
-            {
-                DialogService.ShowMessage($"Ошибка загрузки свойств объекта {spmObj.Name} в БД. См.лог для подробностей.");                
-            }
+                    if (DataModel.SavePropValsToDb(propValues))
+                    {
+                        // освежаем дерево
+                        RootNodes = DataModel.Model.Cast<ISpmNode>().ToList();
+                    }
+                    else
+                    {
+                        DialogService.ShowMessage(
+                            $"Ошибка загрузки свойств объекта {spmObj.Name} в БД. См.лог для подробностей.");
+                        return;
+                    }
 
+                    DialogService.ShowMessage($"Объект {spmObj.Name} успешно загружен в БД");
+                }
+                else
+                {
+                    DialogService.ShowMessage($"Ошибка загрузки объекта {spmObj.Name} в БД. См.лог для подробностей.");
+                }
+            }
+            catch (Exception e)
+            {
+                DialogService.ShowMessage($"Ошибка обновления объекта {SelectedObject.Name}. Текст ошибки: {e.Message}");
+            }        
+    }
+
+        bool CanDoUpdate()
+        {
+            return CanDoExecute() && (SelectedObject != null);
         }
+
+        void DoUpdate()
+        {
+            try
+            {
+                var values = SpectrumValues.Select(item => new SpmLKValue() { Kval = item.KValue, Lval = item.LValue }).ToList();
+                if (DataModel.UpdateObjToDb(SelectedObject, ObjectName, Comment, values))
+                {
+                    // в базе успешно обновили, теперь обновляем объект в моделе
+                    SelectedObject.Name = ObjectName;
+                    SelectedObject.Comment = Comment;
+                    SelectedObject.Values = values;
+
+                    // обновляем свойства
+                    var propValues = PropertyValues.Select(propv => new SpmPropertyValue()
+                    {
+                        Object = SelectedObject,
+                        Property = propv.GetProperty(),
+                        Value = propv.GetPropertyValue()
+                    }).ToList();
+                    if (DataModel.UpdatePropValsToDb(propValues))
+                    {
+                        // освежаем дерево
+                        RootNodes = DataModel.Model.Cast<ISpmNode>().ToList();
+                    }
+                    else
+                    {
+                        DialogService.ShowMessage($"Ошибка обновления свойств объекта {SelectedObject.Name} в БД. См.лог для подробностей.");
+                        return;
+                    }
+                    DialogService.ShowMessage($"Объект {SelectedObject.Name} успешно обновлен в БД");
+                }
+                else
+                {
+                    DialogService.ShowMessage($"Ошибка обновления объекта {SelectedObject.Name} в БД. См.лог для подробностей.");
+                }
+            }
+            catch (Exception e)
+            {
+                DialogService.ShowMessage($"Ошибка обновления объекта {SelectedObject.Name}. Текст ошибки: {e.Message}");
+            }           
+        }
+
     }
 }

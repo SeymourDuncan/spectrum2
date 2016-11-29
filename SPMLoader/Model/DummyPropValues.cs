@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using Coredata;
 
@@ -12,11 +13,11 @@ namespace SPMLoader.Model
         SpmProperty _prop;
         protected bool _isDict;
 
-        public DummyPropValue(SpmProperty prop)
+        public DummyPropValue(SpmProperty prop, string val = "")
         {
             _prop = prop;
             PropertyName = prop.Name;
-            PropertyValue = "";
+            PropertyValue = val;
             _isDict = false;
         }
 
@@ -46,10 +47,19 @@ namespace SPMLoader.Model
 
     public class DummyDictPropValue : DummyPropValue
     {
-        public DummyDictPropValue(SpmProperty prop) : base(prop)
+        public DummyDictPropValue(SpmProperty prop, string val = "") : base(prop, val)
         {
             _isDict = true;
-            Dictionary = prop.Dictionary;            
+            Dictionary = prop.Dictionary;
+
+            if (!string.IsNullOrEmpty(val))
+            {
+                int id = 0;
+                if (Int32.TryParse(val, out id))
+                {
+                    SelectedItem = Dictionary.GetValue(id);
+                }
+            }                
         }        
 
         public DictValue SelectedItem { get; set; }

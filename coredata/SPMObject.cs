@@ -3,6 +3,12 @@ using System.Collections.Generic;
 
 namespace Coredata
 {
+    public struct SpmLKValue
+    {
+        public double Lval;
+        public double Kval;
+    }
+
     public class SpmObject : SpmBase, ISpmNode
     {
         // объекту пофигу какого он класса. Думаю не понадобится
@@ -13,7 +19,8 @@ namespace Coredata
         }
         public SpmSystem System { get; set; }
         public SpmClass Class { get; set; }
-        public Dictionary<double, double> Values { get; set; } = new Dictionary<double, double>();
+        // TODO гавно какое-то.  переделать под List<Point> или вроде того
+        public List<SpmLKValue> Values { get; set; } = new List<SpmLKValue>();
         public string Comment { get; set; }
 
         // тут null потому что у объектов не может быть детей

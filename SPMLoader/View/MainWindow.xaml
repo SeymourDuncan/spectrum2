@@ -21,6 +21,11 @@
             </Style.Triggers>
         </Style>
     </Window.Resources>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding LoadedCommand}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
     <DockPanel>
         <StatusBar Height="26" VerticalAlignment="Bottom" Margin="0,0,0.2,0" DockPanel.Dock="Bottom">
             <StatusBarItem Height="26" Margin="0,0,0,-0.4" VerticalAlignment="Bottom">
@@ -36,7 +41,11 @@
                     <Label x:Name="Usrlbl" Content="Пользователь:"/>
                     <TextBox x:Name="UsrTb" Height="23" TextWrapping="Wrap" Text="{Binding UserName}"/>
                     <Label x:Name="Pwdlbl" Content="Пароль:"/>
-                    <TextBox x:Name="PwdTb" Height="23" TextWrapping="Wrap" Text="{Binding Password}"/>
+                    <PasswordBox x:Name="PwdTb" Height="23">
+                        <i:Interaction.Behaviors>
+                            <bhv:PasswordBehavior Password="{Binding Password, Mode=TwoWay}"/>
+                        </i:Interaction.Behaviors>
+                    </PasswordBox>
                     <Label x:Name="Schlbl" Content="БД:"/>
                     <TextBox x:Name="SchTb" Height="23" TextWrapping="Wrap" Text="{Binding Database}"/>
                     <!--<StackPanel Orientation="Horizontal" FlowDirection="RightToLeft" VerticalAlignment="Bottom">
@@ -75,7 +84,7 @@
                     </Grid>
                     <DockPanel DockPanel.Dock="Top">
                         <Label DockPanel.Dock="Left" Content="Название объекта:"></Label>
-                        <TextBox Style="{StaticResource CbToTbReverse}" Text="{Binding ObjectName}" Margin="0,3,0,0"></TextBox>
+                        <TextBox DockPanel.Dock="Right" Style="{StaticResource CbToTbReverse}" Text="{Binding ObjectName}" Margin="0,3,0,0"></TextBox>
                     </DockPanel>
                     <CheckBox x:Name="SetAsFileNameCbx" Content="Установить название как имя файла" Margin="20,0,0,0" IsChecked="{Binding IsSetAsFileName}" DockPanel.Dock="Top"></CheckBox>
                     <DockPanel DockPanel.Dock="Top">
@@ -97,7 +106,7 @@
                                                                 <Setter Property="ContentTemplate">
                                                                     <Setter.Value>
                                                                         <DataTemplate>
-                                                                            <TextBox Text="{Binding Path=DataContext.PropertyValue, RelativeSource={RelativeSource AncestorType={x:Type DataGridColumn}}}"/>
+                                                                            <TextBox Text="{Binding Path=DataContext.PropertyValue, RelativeSource={RelativeSource AncestorType={x:Type DataGridCell}}}"/>
                                                                         </DataTemplate>
                                                                     </Setter.Value>
                                                                 </Setter>
@@ -121,12 +130,17 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn >
                             </DataGrid.Columns>
-                            <!--<i:Interaction.Behaviors>
-                                <bhv:ColumnHeaderBehavior/>
-                            </i:Interaction.Behaviors>-->
                         </DataGrid>
                     </GroupBox>
-                    <Button Content="Загрузить" Margin="0,0" Height="37" DockPanel.Dock="Bottom" Command="{Binding ExecuteCommand}" />
+                    <Grid DockPanel.Dock="Bottom">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition  Width="1*"></ColumnDefinition>
+                            <ColumnDefinition  Width="1*"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <Button Content="Сохранить новый объект" Height="37" Command="{Binding ExecuteCommand}" />
+                        <Button Content="Редактировать объект" Height="37" Command="{Binding EditCommand}" Grid.Column="1"/>
+                    </Grid>
+                    
                     <GroupBox Header="Значения">
                         <DockPanel>
                             <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" FlowDirection="RightToLeft">
