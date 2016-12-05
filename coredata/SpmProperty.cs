@@ -92,7 +92,9 @@ namespace Coredata
                 case SpmTypeEnum.stInteger:
                     return "0";
                 case SpmTypeEnum.stDictType:
-                    return "0";                        
+                    return "0";
+                case SpmTypeEnum.stDate:
+                    return "01.01.2000";
                 default:
                     return "";
             }

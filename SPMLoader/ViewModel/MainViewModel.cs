@@ -54,6 +54,7 @@ namespace SPMLoader.ViewModel
             _propertyValues = new ObservableCollection<DummyPropValue>();
             ExecuteCommand = new AutoRelayCommand(DoExecute, CanDoExecute);
             EditCommand = new AutoRelayCommand(DoUpdate, CanDoUpdate);
+            DeleteCommand = new AutoRelayCommand(DoDelete, CanDoUpdate);
 
             ExecuteCommand.DependsOn(() => SpectrumValues);
             ExecuteCommand.DependsOn(() => ObjectName);
@@ -65,6 +66,12 @@ namespace SPMLoader.ViewModel
             EditCommand.DependsOn(() => SelectedClass);
             EditCommand.DependsOn(() => SelectedSystem);
             EditCommand.DependsOn(() => SelectedObject);
+
+            DeleteCommand.DependsOn(() => SpectrumValues);
+            DeleteCommand.DependsOn(() => ObjectName);
+            DeleteCommand.DependsOn(() => SelectedClass);
+            DeleteCommand.DependsOn(() => SelectedSystem);
+            DeleteCommand.DependsOn(() => SelectedObject);
         }
 
         SpmStorage DataModel { get; set; }        
@@ -219,22 +226,23 @@ namespace SPMLoader.ViewModel
         /// Находим Систему и Класс выбранного элемента
         /// </summary>
         void UpdateSelectedNodes()
-        {
-            SelectedClass = null;
-            SelectedSystem = null;
-            SelectedObject = null;
+        {                       
             switch (SelectedNode.GetNodeType())
             {
                 case SpmNodeType.SntSystem:
                 {
-                    SelectedSystem = (SpmSystem)SelectedNode;                    
+                    SelectedSystem = (SpmSystem) SelectedNode;
+                    SelectedClass = null;
+                    SelectedObject = null;
                     break;
                 }
                 case SpmNodeType.SntClass:
                 {
                     var cl = (SpmClass) SelectedNode;
                     SelectedClass = cl;
-                    SelectedSystem = cl?.ParentSystem;
+                    if (cl?.ParentSystem.Id != SelectedSystem?.Id)
+                        SelectedSystem = cl?.ParentSystem;
+                    SelectedObject = null;
                     break;
                 }
                 case SpmNodeType.SntObject:
@@ -265,6 +273,7 @@ namespace SPMLoader.ViewModel
                 Status = "Подключение выполнено. Обновляется дерево спектров.";
                 try
                 {
+                    DataModel.Clear();
                     RootNodes = DataModel.Model.Cast<ISpmNode>().ToList();
                 }
                 catch (Exception e)
@@ -299,6 +308,8 @@ namespace SPMLoader.ViewModel
                                 {
                                     SpectrumValues.Add(new SpmDataGridItem() { LValue = arr[0], KValue = arr[1] });
                                 });
+                                ExecuteCommand.RaiseCanExecuteChanged();
+                                EditCommand.RaiseCanExecuteChanged();
                             }
                         }
                     }
@@ -314,6 +325,7 @@ namespace SPMLoader.ViewModel
                 {
                     SpectrumValues.Remove(SelectedTableItem);
                     ExecuteCommand.RaiseCanExecuteChanged();
+                    EditCommand.RaiseCanExecuteChanged();
                 }));
             }
         }
@@ -326,6 +338,7 @@ namespace SPMLoader.ViewModel
                 {
                     SpectrumValues.Add(new SpmDataGridItem() {KValue = 0.0, LValue = 0.0 });
                     ExecuteCommand.RaiseCanExecuteChanged();
+                    EditCommand.RaiseCanExecuteChanged();
                 }));
             }
         }        
@@ -338,6 +351,7 @@ namespace SPMLoader.ViewModel
                 {
                     SpectrumValues.Clear();
                     ExecuteCommand.RaiseCanExecuteChanged();
+                    EditCommand.RaiseCanExecuteChanged();
                 }));
             }
         }
@@ -357,6 +371,9 @@ namespace SPMLoader.ViewModel
 
         // редактировать объект
         public AutoRelayCommand EditCommand { get; set; }
+
+        // редактировать объект
+        public AutoRelayCommand DeleteCommand { get; set; }
 
         bool CanDoExecute()
         {
@@ -463,6 +480,29 @@ namespace SPMLoader.ViewModel
             {
                 DialogService.ShowMessage($"Ошибка обновления объекта {SelectedObject.Name}. Текст ошибки: {e.Message}");
             }           
+        }
+
+        void DoDelete()
+        {
+            var name = SelectedObject.Name;
+            try
+            {                
+                if (DataModel.DeleteObjFromDb(SelectedObject))
+                {                    
+                    SelectedObject = null;                    
+                    // освежаем дерево
+                    RootNodes = DataModel.Model.Cast<ISpmNode>().ToList();                    
+                    DialogService.ShowMessage($"Объект {name} успешно обновлен в БД");
+                }
+                else
+                {
+                    DialogService.ShowMessage($"Ошибка удаления объекта {name} в БД. См.лог для подробностей.");
+                }
+            }
+            catch (Exception e)
+            {
+                DialogService.ShowMessage($"Ошибка обновления объекта {name}. Текст ошибки: {e.Message}");
+            }
         }
 
     }

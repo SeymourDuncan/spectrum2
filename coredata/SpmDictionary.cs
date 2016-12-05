@@ -4,24 +4,12 @@ using System.Linq;
 
 namespace Coredata
 {
-    /// <summary>
-    /// Рарезервированные типы спавочников
-    /// </summary>
-    /// <remarks>
-    /// Теоретически может быть множество справочников. Но есть те, которые непосредственно используются в коде.
-    /// Эти справочники будут иметь тип отличный от sdtUnknown;
-    /// sdt - spetrum dict type
-    /// </remarks>
-    public enum SpmDictionaryType
-    {
-        sdtUnknown = 0,
-        sdtDisease = 1
-    }
-
     public struct DictValue
     {
         // этот id уникален в пределах одного справочника,
         // тот есть этот id не из БД
+        
+        // 0 - отсутствие значения
         public int Id;
         public string Value;
         public string Comment;
@@ -34,18 +22,9 @@ namespace Coredata
 
     // Объект справочник
     public class SpmDictionary: SpmBase
-    {
-        public SpmDictionaryType Type { get; set; }
+    {        
         public SpmDictionary(int id, string name, string comment): base(id, name)
         {
-            if (!Enum.IsDefined(typeof (SpmDictionaryType), id))
-            {
-                Type = (SpmDictionaryType)id;
-            }
-            else
-            {
-                Type = SpmDictionaryType.sdtUnknown;
-            }
             Values = new List<DictValue>();
             Comment = comment;
         }
@@ -77,13 +56,10 @@ namespace Coredata
         {
             Values.Add(dict);
         }
-        public SpmDictionary GetDictoinary(int id)
+        
+        public SpmDictionary GetDictoinary(int type)
         {
-            return Values.FirstOrDefault(dv => dv.Id == id);
-        }
-        public SpmDictionary GetDictoinary(SpmDictionaryType type)
-        {
-            return Values.FirstOrDefault(dv => dv.Type == type);
+            return Values.FirstOrDefault(dv => dv.Id == type);
         }
     }
 

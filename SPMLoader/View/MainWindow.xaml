@@ -7,7 +7,7 @@
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:bhv="clr-namespace:SPMLoader.Behaviors"
         mc:Ignorable="d"
-        Title="Загрузчик спектров" Height="500" Width="1143"
+        Title="Загрузчик спектров" Height="500" Width="1143" WindowState="Maximized"  WindowStartupLocation="CenterScreen"
         DataContext="{Binding Main, Source={StaticResource Locator}}">
     <Window.Resources>
         <Style x:Key="CbToTbReverse" TargetType="{x:Type TextBox}">
@@ -92,7 +92,7 @@
                         <TextBox TextWrapping="Wrap" AcceptsReturn="True" Text="{Binding Comment}" Margin="0,3,0,0" Height="52"></TextBox>
                     </DockPanel>
                     <GroupBox Header="Свойства" DockPanel.Dock="Top">
-                        <DataGrid Margin="0,3,0,0" CanUserAddRows="False"  AutoGenerateColumns="False" ItemsSource="{Binding PropertyValues}">
+                        <DataGrid Margin="0,3,0,0" CanUserAddRows="False" CanUserDeleteRows="False" AutoGenerateColumns="False" ItemsSource="{Binding PropertyValues}">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Название" Binding="{Binding PropertyName}" Width="150"/>
                                 <DataGridTemplateColumn Header="Значение" Width="150">
@@ -117,6 +117,7 @@
                                                                         <DataTemplate>
                                                                             <ComboBox ItemsSource="{Binding Path=DataContext.Dictionary.Values, RelativeSource={RelativeSource AncestorType={x:Type DataGridCell}}}"
                                                                                       SelectedItem="{Binding Path=DataContext.SelectedItem, RelativeSource={RelativeSource AncestorType={x:Type DataGridCell}}}"
+                                                                                      SelectedIndex="0"
                                                                                       />
                                                                         </DataTemplate>
                                                                     </Setter.Value>
@@ -136,9 +137,11 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition  Width="1*"></ColumnDefinition>
                             <ColumnDefinition  Width="1*"></ColumnDefinition>
+                            <ColumnDefinition  Width="1*"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
                         <Button Content="Сохранить новый объект" Height="37" Command="{Binding ExecuteCommand}" />
                         <Button Content="Редактировать объект" Height="37" Command="{Binding EditCommand}" Grid.Column="1"/>
+                        <Button Content="Удалить объект" Height="37" Command="{Binding DeleteCommand}" Grid.Column="2"/>
                     </Grid>
                     
                     <GroupBox Header="Значения">

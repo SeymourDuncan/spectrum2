@@ -18,6 +18,8 @@ namespace SPMLoader.Model
             _prop = prop;
             PropertyName = prop.Name;
             PropertyValue = val;
+            if (string.IsNullOrEmpty(PropertyValue))
+                PropertyValue = _prop.GetDefaultValue();
             _isDict = false;
         }
 

@@ -19,7 +19,11 @@ namespace Coredata
         private IList<SpmSystem> _model = new List<SpmSystem>();
         private bool _isModelLoaded = false;
 
-
+        public void Clear()
+        {
+            _isModelLoaded = false;
+            _model.Clear();
+        }
         //public int LastObjId = 0;
         // собственно модель - это список систем
         public IList<SpmSystem> Model
@@ -168,7 +172,7 @@ namespace Coredata
                             smpObj.Values.Clear();
                             while (valReader.Read())
                             {
-                                smpObj.Values.Add(new SpmLKValue() {Kval = valReader.GetDouble("L_VAL"), Lval = valReader.GetDouble("K_VAL")});
+                                smpObj.Values.Add(new SpmLKValue() {Kval = valReader.GetDouble("K_VAL"), Lval = valReader.GetDouble("L_VAL")});
                             }
                             valReader.Close();
                         }
@@ -352,7 +356,7 @@ namespace Coredata
             {
                 conn.Open();
                 // добавляем значения
-                var cStr = new StringBuilder(SqlHelper.InsertPropValuesQuery);               
+                var cStr = new StringBuilder(SqlHelper.InsertPropValuesQuery);                
 
                 var tmpLst =
                     propVals.Select(val => $"({val.Object.Id}, {val.Property.Id}, \"{val.Value}\")").ToList();
@@ -426,31 +430,56 @@ namespace Coredata
             using (var conn = new MySqlConnection(ConnectionString.ConnectionString))
             {
                 conn.Open();
-                // добавляем значения                
-                foreach (var prop in propVals)
-                {
-                    using (var cmd = new MySqlCommand(SqlHelper.UpdatePropValuesQuery, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@objId", prop.Object.Id);
-                        cmd.Parameters.AddWithValue("@propId", prop.Property.Id);
-                        cmd.Parameters.AddWithValue("@value", prop.Value);
-                        cmd.ExecuteNonQuery();
-                    }
-                }
 
                 // обновляем свойства в модели
                 var sys = propVals[0].Object.System;
                 propVals.ForEach(val =>
                 {
-                    // свойство обязано быть
-                    var propVal = sys.PropValues.First(pval => pval.Object.Id == val.Object.Id && pval.Property.Id == val.Property.Id);
-                    propVal.Value = val.Value;
+                    var propVal = sys.PropValues.FirstOrDefault(pval => pval.Object.Id == val.Object.Id && pval.Property.Id == val.Property.Id);                                       
+                    if (propVal == null)
+                    {
+                        using (var cmd = new MySqlCommand(SqlHelper.InsertPropValueQuery, conn))
+                        {
+                            cmd.Parameters.AddWithValue("@objId", val.Object.Id);
+                            cmd.Parameters.AddWithValue("@propId", val.Property.Id);
+                            cmd.Parameters.AddWithValue("@value", val.Value);
+                            cmd.ExecuteNonQuery();
+                        }
+                        sys.PropValues.Add(val);
+                    }
+                    else
+                    {
+                        using (var cmd = new MySqlCommand(SqlHelper.UpdatePropValuesQuery, conn))
+                        {
+                            cmd.Parameters.AddWithValue("@objId", val.Object.Id);
+                            cmd.Parameters.AddWithValue("@propId", val.Property.Id);
+                            cmd.Parameters.AddWithValue("@value", val.Value);
+                            cmd.ExecuteNonQuery();
+                        }
+                        propVal.Value = val.Value;
+                    }
                 });
 
                 return true;
             }
         }
 
+        public bool DeleteObjFromDb(SpmObject obj)
+        {
+            using (var conn = new MySqlConnection(ConnectionString.ConnectionString))
+            {
+                conn.Open();
+                using (var cmd = new MySqlCommand(SqlHelper.DeleteSpmObjectQuery, conn))
+                {
+                    cmd.Parameters.AddWithValue("@ID", obj.Id);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            // выпиливаем сами себя
+            obj.System.Objects.Remove(obj);
+            obj.Class.ChildList.Remove(obj);            
+            return true;
+        }
 
     }
 }

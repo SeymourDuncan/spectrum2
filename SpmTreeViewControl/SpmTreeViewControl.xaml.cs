@@ -66,6 +66,7 @@ namespace SpmTreeViewControl
             }
         }
 
+        public string ExpandedName { get; set; } = "";
         // Using a DependencyProperty as the backing store for MyProperty.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty SelectedItemProperty =
             DependencyProperty.Register("SelectedItem", typeof(ISpmNode), typeof(SpmTreeViewControl), new PropertyMetadata(null));
@@ -80,6 +81,13 @@ namespace SpmTreeViewControl
                 var item = new SpmTreeViewModelItem(sys);
                 TopLevelItems.Add(item);
             }
+
+            // раскрываем последний выделенный элемент
+            //var selname = SelectedItem?.GetName();
+            //if (!string.IsNullOrEmpty(selname))
+            //{
+                
+            //}
         }
 
         public static void SystemItemsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -146,6 +154,7 @@ namespace SpmTreeViewControl
         }
     }
 
+    // узел
     public class SpmTreeViewModelItem : ViewModelBase
     {
         string _name;
