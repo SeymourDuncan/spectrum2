@@ -28,11 +28,6 @@ namespace Coredata
             return ChildList;
         }
 
-        public string GetName()
-        {
-            return Name;
-        }
-
         public SpmNodeType GetNodeType()
         {
             return SpmNodeType.SntClass;

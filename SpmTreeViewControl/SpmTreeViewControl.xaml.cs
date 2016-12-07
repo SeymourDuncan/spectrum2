@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using GalaSoft.MvvmLight;
@@ -25,9 +26,17 @@ namespace SpmTreeViewControl
             _propertyChangedHandler = new PropertyChangedEventHandler(item_PropertyChanged);
             _collectionChangedhandler = new NotifyCollectionChangedEventHandler(items_CollectionChanged);
             TopLevelItems.CollectionChanged += _collectionChangedhandler;
-           
+
+            _expandedIds = new List<int>();
+
             LayoutRoot.DataContext = this;
         }
+
+        // список раскрытых нодов
+        List<int> _expandedIds;
+
+        // #ягавнакодер. Флаг чтоб при построении дерева _expandedIds не заполнялся заново.
+        bool _lockExpand = false; 
 
         private ObservableCollection<SpmTreeViewModelItem> _topLevelItems;
 
@@ -66,7 +75,6 @@ namespace SpmTreeViewControl
             }
         }
 
-        public string ExpandedName { get; set; } = "";
         // Using a DependencyProperty as the backing store for MyProperty.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty SelectedItemProperty =
             DependencyProperty.Register("SelectedItem", typeof(ISpmNode), typeof(SpmTreeViewControl), new PropertyMetadata(null));
@@ -75,19 +83,16 @@ namespace SpmTreeViewControl
         #endregion
         public void BuildTree()
         {
+            _lockExpand = true;
             TopLevelItems.Clear();
             foreach (var sys in SystemItems)
             {
                 var item = new SpmTreeViewModelItem(sys);
                 TopLevelItems.Add(item);
+                if (_expandedIds.Any()) 
+                    item.DoExpand(_expandedIds);
             }
-
-            // раскрываем последний выделенный элемент
-            //var selname = SelectedItem?.GetName();
-            //if (!string.IsNullOrEmpty(selname))
-            //{
-                
-            //}
+            _lockExpand = false;
         }
 
         public static void SystemItemsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -143,6 +148,22 @@ namespace SpmTreeViewControl
                 //OnPropertyChanged("SelectedItem");
                 SelectedItem = ((SpmTreeViewModelItem) sender).Node;
             }
+            else if (e.PropertyName == "IsExpanded")
+            {
+                if (_lockExpand)
+                    return;
+                var item = (SpmTreeViewModelItem)sender;
+                var node = item.Node;
+                var expanded = item.IsExpanded;
+                if (expanded)
+                {
+                    _expandedIds.Add(node.Id);
+                }
+                else
+                {
+                    _expandedIds.Remove(node.Id);
+                }
+            }
         }
 
         //
@@ -162,7 +183,7 @@ namespace SpmTreeViewControl
         {
             Children = new ObservableCollection<SpmTreeViewModelItem>();
             Node = node;
-            _name = Node.GetName();
+            _name = Node.Name;
             var childNodes = node.GetChildNodes();
             if (childNodes != null)
             {
@@ -171,6 +192,19 @@ namespace SpmTreeViewControl
                     var item = new SpmTreeViewModelItem(nd);
                     Children.Add(item);
                 }
+            }
+        }
+
+        // делает расскрытым текущий узел и передает список раскрытых детям
+        public void DoExpand(IList<int> expandLst)
+        {            
+            if (expandLst.Contains(Node.Id))
+            {
+                IsExpanded = true;
+            }
+            foreach (var child in Children)
+            {
+                child.DoExpand(expandLst);
             }
         }
 
@@ -189,6 +223,17 @@ namespace SpmTreeViewControl
         public ObservableCollection<SpmTreeViewModelItem> Children { get; private set; }
 
         bool _isSelected;
+        bool _isExpanded;
+
+        public bool IsExpanded
+        {
+            get { return _isExpanded; }
+            set
+            {
+                _isExpanded = value;
+                RaisePropertyChanged("IsExpanded");
+            }
+        }
 
         public bool IsSelected
         {

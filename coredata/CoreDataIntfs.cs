@@ -16,13 +16,17 @@ namespace Coredata
     /// <summary>
     /// интерфейс для дерева объектов
     /// </summary>
-    public interface ISpmNode
+    public interface ISpmNode: ISpmBase
     {
         IEnumerable<ISpmNode> GetChildNodes();
         SpmNodeType GetNodeType();
-        string GetName();
     }
 
+    public interface ISpmBase
+    {
+        int Id { get; set; }
+        string Name { get; set; }
+    }
 
     public interface ISpmLoader
     {

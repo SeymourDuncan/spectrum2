@@ -10,10 +10,11 @@
         <TextBlock DockPanel.Dock="Top" Text="Поиск..."/>
         <TreeView ItemsSource="{Binding TopLevelItems}">
         <TreeView.ItemContainerStyle>
-            <Style TargetType="{x:Type TreeViewItem}">
-                <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
-            </Style>
-        </TreeView.ItemContainerStyle>
+                <Style TargetType="{x:Type TreeViewItem}">
+                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
+                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
+                </Style>
+            </TreeView.ItemContainerStyle>
         <TreeView.ItemTemplate>
             <HierarchicalDataTemplate ItemsSource="{Binding Children}">
                 <!--Здесь можно задать любой шаблон для элемента-->

@@ -40,11 +40,6 @@ namespace Coredata
             return Classes.Where(cl => cl.IsRootClass);
         }
 
-        public string GetName()
-        {
-            return Name;
-        }
-
         public SpmNodeType GetNodeType()
         {
             return SpmNodeType.SntSystem;
@@ -57,6 +52,6 @@ namespace Coredata
             if (!Properties.Properties.Contains(prop))
                 return; //  throw?
             PropValues.Add(val);
-        }        
+        }
     }
 }

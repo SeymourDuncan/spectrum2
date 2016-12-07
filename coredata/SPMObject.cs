@@ -33,10 +33,5 @@ namespace Coredata
         {
             return SpmNodeType.SntObject;
         }
-
-        public string GetName()
-        {
-            return Name;
-        }        
     }
 }
