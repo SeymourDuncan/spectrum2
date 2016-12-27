@@ -1,9 +1,7 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.IO.Packaging;
 using System.Linq;
 using Coredata;
 using GalaSoft.MvvmLight;
@@ -11,21 +9,10 @@ using System.Windows.Input;
 using coredata;
 using GalaSoft.MvvmLight.Command;
 using SPMLoader.Model;
+using Spm.Shared;
 
 namespace SPMLoader.ViewModel
 {
-    /// <summary>
-    /// This class contains properties that the main View can data bind to.
-    /// <para>
-    /// Use the <strong>mvvminpc</strong> snippet to add bindable properties to this ViewModel.
-    /// </para>
-    /// <para>
-    /// You can also use Blend to data bind with the tool's support.
-    /// </para>
-    /// <para>
-    /// See http://www.galasoft.ch/mvvm
-    /// </para>
-    /// </summary>
     public class MainViewModel : ViewModelBase
     {
         private ICommand _connectCommand;
@@ -77,7 +64,7 @@ namespace SPMLoader.ViewModel
         SpmStorage DataModel { get; set; }        
         public IDialogService DialogService { get; set; }
 
-        public string ServerName { get; set; } = "localhost";
+        public string ServerName { get; set; } = "localhost"; /*"sql7.freemysqlhosting.net"*/
         public string UserName { get; set; } = "root";
 
         public string Password

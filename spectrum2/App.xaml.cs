@@ -4,7 +4,7 @@ using System.Configuration;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace spectrum2
+namespace Spectrum2
 {
     /// <summary>
     /// Interaction logic for App.xaml

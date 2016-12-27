@@ -6,6 +6,7 @@
         xmlns:speTreeViewControl="clr-namespace:SpmTreeViewControl;assembly=SpmTreeViewControl"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:bhv="clr-namespace:SPMLoader.Behaviors"
+        xmlns:behaviors="clr-namespace:Spm.Shared.Behaviors;assembly=Spm.Shared"
         mc:Ignorable="d"
         Title="Загрузчик спектров" Height="500" Width="1143" WindowState="Maximized"  WindowStartupLocation="CenterScreen"
         DataContext="{Binding Main, Source={StaticResource Locator}}">
@@ -43,7 +44,7 @@
                     <Label x:Name="Pwdlbl" Content="Пароль:"/>
                     <PasswordBox x:Name="PwdTb" Height="23">
                         <i:Interaction.Behaviors>
-                            <bhv:PasswordBehavior Password="{Binding Password, Mode=TwoWay}"/>
+                            <behaviors:PasswordBehavior Password="{Binding Password, Mode=TwoWay}"/>
                         </i:Interaction.Behaviors>
                     </PasswordBox>
                     <Label x:Name="Schlbl" Content="БД:"/>

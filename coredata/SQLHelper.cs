@@ -8,32 +8,32 @@ namespace Coredata
 {
     public static class SqlHelper
     {
-        public static string SelectSystemsQuery = "Select * from SYSTEM";
+        public static string SelectSystemsQuery = "Select * from system";
 
-        public static string SelectObjectsBySystemQuery = "Select * from OBJECT where SYSTEM_ID = @systemId";
+        public static string SelectObjectsBySystemQuery = "Select * from object where system_id = @systemId";
 
-        public static string SelectClassesBySystemQuery = "Select * from CLASS where SYSTEM_ID = @systemId";
+        public static string SelectClassesBySystemQuery = "Select * from class where system_id = @systemId";
 
-        public static string SelectSpmValuesByObjectQuery = "Select * from SPECTRUM_VALUE where OBJ_ID = @objId order by L_VAL";
+        public static string SelectSpmValuesByObjectQuery = "Select * from spectrum_value where obj_id = @objId order by l_val";
 
-        public static string SelectDictionariesQuery = "Select * from DICTIONARY";
-        public static string SelectDictionaryValueQuery = "Select * from DICTIONARY_VALUE where DICT_TYPE = @dict_id order by ID";
+        public static string SelectDictionariesQuery = "Select * from dictionary";
+        public static string SelectDictionaryValueQuery = "Select * from dictionary_value where dict_type = @dict_id order by id";
 
-        public static string SelectPropertyBySystemQuery = "Select * from PROPERTY where SYSTEM_ID = @system_id";
-        public static string SelectPropertyValueQuery = "Select * from PROPERTY_VALUE where PROPERTY_ID = @property_id";
+        public static string SelectPropertyBySystemQuery = "Select * from property where system_id = @system_id";
+        public static string SelectPropertyValueQuery = "Select * from property_value where property_id = @property_id";
 
-        public static string SelectPropValueTypesQuery = "Select * from VALUE_TYPE";
+        public static string SelectPropValueTypesQuery = "Select * from value_type";
 
-        public static string InsertObjectQuery = "Insert into OBJECT(NAME, CLASS_ID, SYSTEM_ID, COMMENT) values(@name, @class_id, @system_id, @comment)";
-        public static string InsertSpmValuesQuery = "Insert into SPECTRUM_VALUE(OBJ_ID, L_VAL, K_VAL) values";
-        public static string InsertPropValuesQuery = "Insert into PROPERTY_VALUE(OBJ_ID, PROPERTY_ID, VALUE) values";
-        public static string InsertPropValueQuery = "Insert into PROPERTY_VALUE(OBJ_ID, PROPERTY_ID, VALUE) values (@objId, @propId, @value)";
+        public static string InsertObjectQuery = "Insert into object(name, class_id, system_id, comment) values(@name, @class_id, @system_id, @comment)";
+        public static string InsertSpmValuesQuery = "Insert into spectrum_value(obj_id, l_val, k_val) values";
+        public static string InsertPropValuesQuery = "Insert into property_value(obj_id, property_id, value) values";
+        public static string InsertPropValueQuery = "Insert into property_value(obj_id, property_id, value) values (@objId, @propId, @value)";
 
-        public static string UpdateObjectQuery = "Update OBJECT set NAME=@name, COMMENT=@comment where ID=@objId";
-        public static string UpdatePropValuesQuery = "Update PROPERTY_VALUE set VALUE=@value where OBJ_ID=@objId and PROPERTY_ID=@propId";
+        public static string UpdateObjectQuery = "Update object set name=@name, comment=@comment where id=@objId";
+        public static string UpdatePropValuesQuery = "Update property_value set value=@value where obj_id=@objId and property_id=@propId";
 
-        public static string DeleteSpmObjectQuery = "Delete from OBJECT where ID=@Id";
-        public static string DeleteSpmValuesQuery = "Delete from SPECTRUM_VALUE where OBJ_ID=@objId";
-        public static string DeleteSpmPropValuesQuery = "Delete from PROPERTY_VALUE where OBJ_ID=@objId";
+        public static string DeleteSpmObjectQuery = "Delete from object where id=@Id";
+        public static string DeleteSpmValuesQuery = "Delete from spectrum_value where obj_id=@objId";
+        public static string DeleteSpmPropValuesQuery = "Delete from property_value where obj_id=@objId";
     }
 }   

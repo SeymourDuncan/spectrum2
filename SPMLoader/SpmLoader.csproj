@@ -67,12 +67,10 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Behaviors\ColumnHeaderBehavior.cs" />
-    <Compile Include="Behaviors\PasswordBehavior.cs" />
     <Compile Include="Model\DummyPropValues.cs" />
     <Compile Include="Model\FileParser.cs" />
     <Compile Include="Model\SpmDataGridItem.cs" />
     <Compile Include="ViewModel\AutoRelayCommand.cs" />
-    <Compile Include="ViewModel\DialogService.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\ViewModelLocator.cs" />
     <Page Include="View\MainWindow.xaml">
@@ -120,6 +118,10 @@
     <ProjectReference Include="..\coredata\Coredata.csproj">
       <Project>{73582741-439b-4b96-a76a-a7fe759b6ed6}</Project>
       <Name>Coredata</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Spm.Shared\Spm.Shared.csproj">
+      <Project>{F6A4D077-01C0-4FB0-ACEB-AD1974F57CF4}</Project>
+      <Name>Spm.Shared</Name>
     </ProjectReference>
     <ProjectReference Include="..\SpmTreeViewControl\SpmTreeViewControl.csproj">
       <Project>{f6b58dde-9628-4a73-a209-7e3d4b50bc2f}</Project>

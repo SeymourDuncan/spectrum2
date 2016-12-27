@@ -2,7 +2,7 @@
 using System.Windows.Controls;
 using System.Windows.Interactivity;
 
-namespace SPMLoader.Behaviors
+namespace Spm.Shared.Behaviors
 {
     public class PasswordBehavior : Behavior<PasswordBox>
     {

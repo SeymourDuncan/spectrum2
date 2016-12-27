@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpmLoader", "SPMLoader\SpmL
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpmTreeViewControl", "SpmTreeViewControl\SpmTreeViewControl.csproj", "{F6B58DDE-9628-4A73-A209-7E3D4B50BC2F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Spm.Shared", "Spm.Shared\Spm.Shared.csproj", "{F6A4D077-01C0-4FB0-ACEB-AD1974F57CF4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{F6B58DDE-9628-4A73-A209-7E3D4B50BC2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F6B58DDE-9628-4A73-A209-7E3D4B50BC2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F6B58DDE-9628-4A73-A209-7E3D4B50BC2F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6A4D077-01C0-4FB0-ACEB-AD1974F57CF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6A4D077-01C0-4FB0-ACEB-AD1974F57CF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6A4D077-01C0-4FB0-ACEB-AD1974F57CF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6A4D077-01C0-4FB0-ACEB-AD1974F57CF4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

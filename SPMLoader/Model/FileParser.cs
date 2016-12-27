@@ -31,11 +31,11 @@ namespace SPMLoader.Model
                 return false;
 
             var extens = Path.GetExtension(fileName);
-            if (extens == CsvExtension)
+            if (extens.Equals(CsvExtension, StringComparison.CurrentCultureIgnoreCase))
             {
                 return ParseCsv();
             }
-            else if (extens == XlsxExtension)
+            else if (extens.Equals(XlsxExtension, StringComparison.CurrentCultureIgnoreCase))
             {
                 return ParseXlsx();
             }

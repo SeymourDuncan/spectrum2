@@ -109,7 +109,7 @@ namespace Coredata
                         Convert.ToDateTime(val);
                         break;
                     case SpmTypeEnum.stDouble:
-                        Convert.ToDouble(val);
+                        Convert.ToDouble(val.Replace('.', ','));
                         break;
                     case SpmTypeEnum.stInteger:
                         Convert.ToInt32(val);

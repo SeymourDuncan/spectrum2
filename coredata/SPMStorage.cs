@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 using System.Data;
 using System.Globalization;
+using spectrum2.Model;
 
 namespace Coredata
 {
@@ -43,6 +44,11 @@ namespace Coredata
         public SpmDictionaries Dictionaries { get; set; }
 
         public SpmPropValueTypes PropValueTypes { get; set; }
+
+        public bool Connect(ConnectionData cdata)
+        {
+            return Connect(cdata.ServerName, cdata.UserName, cdata.Password, cdata.Database);
+        }
 
         /// <summary>
         /// проверяем подключение
@@ -270,7 +276,8 @@ namespace Coredata
                 while (reader.Read())
                 {
                     var dictVal = new DictValue();
-                    dictVal.Id = idx;
+                    //dictVal.Id = idx;
+                    dictVal.Id = reader.GetInt32("ID");
                     dictVal.Value = reader.GetString("NAME");
                     var ord = reader.GetOrdinal("COMMENT");
                     dictVal.Comment = reader.IsDBNull(ord) ? "" : reader.GetString(ord);
