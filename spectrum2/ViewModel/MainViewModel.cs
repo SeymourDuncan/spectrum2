@@ -19,7 +19,8 @@ namespace Spectrum2.ViewModel
         private IList<ISpmNode> _rootNodes;
         private ISpmNode _selectedNode;
         private readonly ICommand _loadedCommand;
-        private string _lastLogMsg;
+        private string _lastLogMsg;        
+        private Visibility _progBarVisibility;
 
         public ConnectionData ConnData { get; set; }
         public IDialogService DiagService { get; set; }
@@ -88,9 +89,19 @@ namespace Spectrum2.ViewModel
         //стораж
         public SpmStorage DataModel { get; set; }
 
-        
+        public Visibility ProgBarVisibility
+        {
+            get { return _progBarVisibility; }
+            set
+            {
+                _progBarVisibility = value;
+                RaisePropertyChanged("ProgBarVisibility");
+            }
+        }
+
         async void Connect()
         {
+            ProgBarVisibility = Visibility.Visible;
             DataModel.Clear();
             var connected = await DataModel.Connect(ConnData);
             if (connected)
@@ -110,6 +121,7 @@ namespace Spectrum2.ViewModel
             {
                 Logger.AddError("Ошибка подключения к БД.");
             }
+            ProgBarVisibility = Visibility.Hidden;
         }
 
         public string LastLogMsg

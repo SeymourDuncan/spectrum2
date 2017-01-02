@@ -49,9 +49,9 @@
             <StatusBarItem>
                 <TextBlock Text="{Binding LastLogMsg}" />
             </StatusBarItem>
-            <!--<StatusBarItem>
-                <ProgressBar Width="100" Height="15" Value="67" />
-            </StatusBarItem>-->
+            <StatusBarItem>
+                <ProgressBar Width="100" Height="15" Value="67" IsIndeterminate="True" Visibility="{Binding ProgBarVisibility}"/>
+            </StatusBarItem>
         </StatusBar>
     </Grid>
 </Window>
