@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace spectrum2.Model
+﻿namespace Spm.Shared
 {
     public struct ConnectionData
     {

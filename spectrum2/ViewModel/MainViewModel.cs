@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using Coredata;
@@ -8,7 +9,7 @@ using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using Spm.Shared;
 using GalaSoft.MvvmLight.Messaging;
-using spectrum2.Model;
+using Spectrum2.Model;
 
 namespace Spectrum2.ViewModel
 {
@@ -18,6 +19,7 @@ namespace Spectrum2.ViewModel
         private IList<ISpmNode> _rootNodes;
         private ISpmNode _selectedNode;
         private readonly ICommand _loadedCommand;
+        private string _lastLogMsg;
 
         public ConnectionData ConnData { get; set; }
         public IDialogService DiagService { get; set; }
@@ -28,6 +30,7 @@ namespace Spectrum2.ViewModel
             ConnData = new ConnectionData(Properties.Settings.Default.Host, Properties.Settings.Default.User, Properties.Settings.Default.Password, Properties.Settings.Default.DataBase);
             // создаем хранилище
             DataModel = new SpmStorage();
+            Logger.MessageAdded += OnLogMessageAdded;
         }
 
         public ICommand OpenConnectionSettingCommand
@@ -86,26 +89,37 @@ namespace Spectrum2.ViewModel
         public SpmStorage DataModel { get; set; }
 
         
-        void Connect()
+        async void Connect()
         {
-            if (DataModel.Connect(ConnData))
+            DataModel.Clear();
+            var connected = await DataModel.Connect(ConnData);
+            if (connected)
             {                
                 try
-                {
-                    DataModel.Clear();
-                    RootNodes = DataModel.Model.Cast<ISpmNode>().ToList();
+                {                                       
+                    var model = await DataModel.GetModel();
+                    RootNodes = model.Cast<ISpmNode>().ToList();
+                    Logger.AddError("Модель спектров успешно загружена.");
                 }
                 catch (Exception e)
                 {
-                    //Status = $"Обновление дерева спектров не удалось. Причина: {e.Message}";
-                    return;
-                }
-                //Status = "Дерево спектров обновлено.";
+                    Logger.AddError("Ошибка загрузки модели спектров.");                    
+                }                
             }
-            //else
-            //{
-            //    Status = "Не удалось выполнить подключение к БД.";
-            //}
+            else
+            {
+                Logger.AddError("Ошибка подключения к БД.");
+            }
+        }
+
+        public string LastLogMsg
+        {
+            get { return _lastLogMsg; }
+            set
+            {
+                _lastLogMsg = value;
+                RaisePropertyChanged();
+            }
         }
 
         public ISpmNode SelectedNode
@@ -116,6 +130,11 @@ namespace Spectrum2.ViewModel
                 _selectedNode = value;
                 RaisePropertyChanged();
             }
+        }
+
+        void OnLogMessageAdded(object Sender, string msg)
+        {
+            LastLogMsg = msg;
         }
     }
 }

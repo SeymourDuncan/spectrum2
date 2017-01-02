@@ -81,7 +81,7 @@ namespace Spectrum2.ViewModel
             }
         }
 
-        private void ConnSettings_ChangeConnData(object sender, spectrum2.Model.ConnectionData e)
+        private void ConnSettings_ChangeConnData(object sender, ConnectionData e)
         {
             throw new System.NotImplementedException();
         }

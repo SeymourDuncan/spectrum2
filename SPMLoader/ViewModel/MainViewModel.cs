@@ -253,9 +253,10 @@ namespace SPMLoader.ViewModel
             }
         }
 
-        public ICommand ConnectCommand => _connectCommand?? (_connectCommand = new RelayCommand<object>((obj) =>
+        public ICommand ConnectCommand => _connectCommand?? (_connectCommand = new RelayCommand<object>(async (obj) =>
         {
-            if (DataModel.Connect(ServerName, UserName, Password, Database))
+            var connceted = await DataModel.Connect(ServerName, UserName, Password, Database);
+            if (connceted)
             {
                 Status = "Подключение выполнено. Обновляется дерево спектров.";
                 try

@@ -14,10 +14,11 @@
             <i:InvokeCommandAction Command="{Binding LoadedCommand}"/>
         </i:EventTrigger>
     </i:Interaction.Triggers>
-    <Grid>
+    <Grid IsEnabled="{Binding UIBlocked}">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition/>
+            <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
         <Menu>
             <MenuItem Header="Файл">
@@ -44,5 +45,13 @@
                 <!--SystemItems="{Binding RootNodes}" SelectedItem="{Binding SelectedNode, Mode=TwoWay}"-->
             </GroupBox>
         </Grid>
+        <StatusBar Grid.Row="2">
+            <StatusBarItem>
+                <TextBlock Text="{Binding LastLogMsg}" />
+            </StatusBarItem>
+            <!--<StatusBarItem>
+                <ProgressBar Width="100" Height="15" Value="67" />
+            </StatusBarItem>-->
+        </StatusBar>
     </Grid>
 </Window>

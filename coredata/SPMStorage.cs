@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 using System.Data;
 using System.Globalization;
-using spectrum2.Model;
+using Spm.Shared;
 
 namespace Coredata
 {
@@ -25,7 +25,7 @@ namespace Coredata
             _isModelLoaded = false;
             _model.Clear();
         }
-        //public int LastObjId = 0;
+        
         // собственно модель - это список систем
         public IList<SpmSystem> Model
         {
@@ -39,15 +39,24 @@ namespace Coredata
             }
         }
 
+        public async Task<IList<SpmSystem>> GetModel()
+        {
+            if (!_isModelLoaded)
+            {
+                _isModelLoaded = await Task<bool>.Factory.StartNew(InitModel);
+            }            
+            return _model;
+        }
+
         public MySqlConnectionStringBuilder ConnectionString { get; private set; }
 
         public SpmDictionaries Dictionaries { get; set; }
 
         public SpmPropValueTypes PropValueTypes { get; set; }
 
-        public bool Connect(ConnectionData cdata)
+        public async Task<bool> Connect(ConnectionData cdata)
         {
-            return Connect(cdata.ServerName, cdata.UserName, cdata.Password, cdata.Database);
+            return await Connect(cdata.ServerName, cdata.UserName, cdata.Password, cdata.Database);
         }
 
         /// <summary>
@@ -58,23 +67,28 @@ namespace Coredata
         /// <param name="password"></param>
         /// <param name="database"></param>
         /// <returns></returns>
-        public bool Connect(string server, string user, string password, string database)
+        public async Task<bool> Connect(string server, string user, string password, string database)
         {
             ConnectionString.Server = server;
             ConnectionString.UserID = user;
             ConnectionString.Password = password;
             ConnectionString.Database = database;
-            var success = true;
+            var success = false;
             using (var conn = new MySqlConnection(ConnectionString.ConnectionString))
             {
-                try
+                await Task.Factory.StartNew(() =>
                 {
-                    conn.Open();
-                }
-                catch (Exception e)
-                {
-                    success = false;
-                }
+                    try
+                    {
+                        conn.Open();
+                        success = true;
+                    }
+                    catch
+                    {
+                        success = false;
+                    }
+                });
+
             }
             return success;
         }

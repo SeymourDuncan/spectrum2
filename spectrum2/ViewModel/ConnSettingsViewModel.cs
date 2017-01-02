@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
-using spectrum2.Model;
+using Spm.Shared;
 
 namespace spectrum2.ViewModel
 {
